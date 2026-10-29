@@ -1,4 +1,4 @@
-<!doctype html>
+2<!doctype html>
 <html lang="uk">
 <head>
   <meta charset="utf-8">
@@ -194,7 +194,7 @@
     saveMonth(); render();
   }
   function compute(){
-    const workingDays=Array.from({length:daysInMonth()},(_,i)=>i+1).filter(isWeekday).length;
+    const workingDays = Array.from({ length: daysInMonth() },(_, i) => i + 1).filter(d => isWeekday(d) && days[d] !== 'rest').length;
     const hourly=workingDays ? settings.salary/(workingDays*8) : 0;
     let overtimeHours=0, unpaidDays=0, shifts8=0, shifts12=0;
     for(let d=1;d<=daysInMonth();d++){
