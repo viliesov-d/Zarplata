@@ -1,744 +1,262 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111827">
-  <meta name="description" content="Розрахунок заробітної плати та облік робочих змін">
-  <link rel="manifest" href="./manifest.webmanifest">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101114">
+  <meta name="description" content="Особистий офлайн-калькулятор зарплати, змін, авансу та премії.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
   <title>Моя зарплата</title>
-
   <style>
-    :root {
-      color-scheme: dark;
-      --bg: #111827;
-      --panel: #1f2937;
-      --panel2: #273449;
-      --border: #374151;
-      --text: #f3f4f6;
-      --muted: #9ca3af;
-      --accent: #60a5fa;
-      --green: #34d399;
-      --orange: #fbbf24;
-      --red: #f87171;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Arial, sans-serif;
-      font-size: 15px;
-      line-height: 1.45;
-    }
-
-    .container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-
-    header {
-      padding: 8px 0 18px;
-    }
-
-    h1 {
-      margin: 0 0 5px;
-      font-size: 27px;
-    }
-
-    h2 {
-      margin: 0 0 14px;
-      font-size: 18px;
-    }
-
-    .subtitle, .muted {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 14px;
-    }
-
-    .settings-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    input, select {
-      width: 100%;
-      min-height: 42px;
-      padding: 9px 10px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: #111827;
-      color: var(--text);
-      font: inherit;
-    }
-
-    button {
-      min-height: 40px;
-      padding: 9px 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--panel2);
-      color: var(--text);
-      font: inherit;
-      cursor: pointer;
-    }
-
-    button:active { opacity: .75; }
-
-    button.primary {
-      background: #2563eb;
-      border-color: #2563eb;
-    }
-
-    button.success {
-      border-color: #047857;
-      background: #064e3b;
-    }
-
-    button.warning {
-      border-color: #92400e;
-      background: #78350f;
-    }
-
-    button.danger {
-      border-color: #991b1b;
-      background: #7f1d1d;
-    }
-
-    .buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .month-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      align-items: end;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .stat {
-      background: #111827;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 13px;
-      min-width: 0;
-    }
-
-    .stat-label {
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 7px;
-    }
-
-    .stat-value {
-      font-size: 21px;
-      font-weight: bold;
-      overflow-wrap: anywhere;
-    }
-
-    .highlight .stat-value { color: var(--green); }
-
-    .calendar-head, .calendar {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 5px;
-    }
-
-    .calendar-head {
-      margin-bottom: 7px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .day {
-      min-width: 0;
-      min-height: 66px;
-      padding: 5px 1px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: #111827;
-    }
-
-    .day.empty {
-      border-color: transparent;
-      background: transparent;
-      cursor: default;
-    }
-
-    .day-number { font-size: 13px; }
-
-    .day-status {
-      font-size: 11px;
-      font-weight: bold;
-      overflow-wrap: anywhere;
-    }
-
-    .day.s8 {
-      border-color: #047857;
-      background: #064e3b;
-    }
-
-    .day.s12 {
-      border-color: #1d4ed8;
-      background: #1e3a8a;
-    }
-
-    .day.unpaid {
-      border-color: #92400e;
-      background: #78350f;
-    }
-
-    .day.rest {
-      color: #9ca3af;
-      background: #1f2937;
-    }
-
-    .day.weekend .day-number { color: var(--muted); }
-
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .legend span::before {
-      content: "";
-      display: inline-block;
-      width: 9px;
-      height: 9px;
-      margin-right: 5px;
-      border-radius: 3px;
-      background: currentColor;
-    }
-
-    .legend .l8 { color: var(--green); }
-    .legend .l12 { color: var(--accent); }
-    .legend .lu { color: var(--orange); }
-    .legend .lr { color: var(--muted); }
-
-    .result-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .result-row:last-child { border-bottom: 0; }
-    .result-row span:first-child { color: var(--muted); }
-    .result-row strong { text-align: right; }
-
-    .notice {
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    footer {
-      padding: 8px 0 22px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    @media (max-width: 420px) {
-      .container { padding: 10px; }
-      .panel { padding: 12px; }
-      h1 { font-size: 24px; }
-      .day { min-height: 57px; }
-      .day-status { font-size: 10px; }
-      .stat-value { font-size: 18px; }
-      .calendar, .calendar-head { gap: 3px; }
-    }
+    :root{color-scheme:dark;--bg:#0d0e11;--panel:#17191f;--panel2:#20232b;--line:#30343e;--text:#f3f4f6;--muted:#9da3b0;--accent:#a5f36b;--accentText:#14200d;--blue:#91baff;--orange:#ffc078;--red:#ff8888}
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(ellipse at top,#1b2028 0,#0d0e11 48%);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+    .app{max-width:760px;margin:0 auto;padding:20px 15px 40px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:4px 0 20px}
+    .eyebrow{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+    h1{font-size:27px;line-height:1.15;margin:4px 0 0;letter-spacing:-.04em}
+    .offline{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:7px 9px;border-radius:999px;white-space:nowrap}
+    .monthbar{display:grid;grid-template-columns:46px 1fr 46px;align-items:center;gap:10px;margin-bottom:14px}
+    .monthname{text-align:center;font-size:18px;font-weight:750}
+    button,select,input{font:inherit}
+    button{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;min-height:42px;padding:9px 12px;transition:transform .08s,border-color .15s}
+    button:active{transform:scale(.98)}
+    .navbtn{font-size:21px;padding:0}
+    .hero{background:linear-gradient(140deg,#252b31,#17191f 70%);border:1px solid #343a42;border-radius:22px;padding:20px;margin-bottom:13px;position:relative;overflow:hidden}
+    .hero:after{content:"₴";position:absolute;right:18px;top:-22px;font-size:115px;font-weight:900;color:#ffffff07;pointer-events:none}
+    .muted{color:var(--muted)}
+    .hero-label{font-size:13px;color:#c5c9d1}
+    .hero-value{font-size:clamp(34px,8vw,46px);font-weight:850;letter-spacing:-.05em;margin:5px 0 13px;line-height:1.1}
+    .hero-foot{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{font-size:12px;padding:6px 9px;border-radius:9px;background:#ffffff0a;border:1px solid #ffffff12;color:#dce0e7}
+    .chip strong{color:var(--accent)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+    .stat{padding:14px;border:1px solid var(--line);background:var(--panel);border-radius:16px;min-width:0}
+    .stat .label{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .stat .value{font-size:21px;font-weight:780;letter-spacing:-.03em;overflow-wrap:anywhere}
+    .stat .note{font-size:11px;color:var(--muted);margin-top:5px}
+    .section{margin-top:22px}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
+    h2{font-size:17px;margin:0;letter-spacing:-.02em}
+    .small{font-size:12px;color:var(--muted)}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .primary{background:var(--accent);color:var(--accentText);border-color:transparent;font-weight:800}
+    .secondary{background:var(--panel);font-weight:650}
+    .calendar{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px}
+    .weekdays,.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+    .weekdays{margin-bottom:7px}
+    .weekdays span{text-align:center;font-size:11px;color:var(--muted);padding:4px 0}
+    .day{padding:5px 1px;min-height:56px;border-radius:10px;background:#20232a;border:1px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+    .day.empty{background:transparent;border-color:transparent;pointer-events:none}
+    .day .num{font-size:13px;font-weight:750}
+    .day .tag{font-size:9px;line-height:1.1;text-align:center;color:#b7beca}
+    .day.s8{background:#1d2b1a;border-color:#36522c}.day.s8 .tag{color:var(--accent)}
+    .day.s12{background:#2b2418;border-color:#5d4728}.day.s12 .tag{color:var(--orange)}
+    .day.unpaid{background:#301d22;border-color:#65323c}.day.unpaid .tag{color:var(--red)}
+    .day.rest .tag{color:#7f8795}
+    .day.today{outline:1px solid var(--blue);outline-offset:1px}
+    .legend{display:flex;flex-wrap:wrap;gap:10px;margin:11px 2px 0;color:var(--muted);font-size:11px}
+    .dot{display:inline-block;width:8px;height:8px;border-radius:3px;margin-right:4px}
+    .edit-hint{font-size:12px;color:var(--muted);margin:8px 2px 0}
+    .payrows{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}
+    .payrow{display:flex;justify-content:space-between;gap:14px;padding:13px 14px;border-bottom:1px solid var(--line)}
+    .payrow:last-child{border-bottom:0}
+    .payrow .name{font-size:13px;color:#c8cbd3}
+    .payrow .amount{font-weight:750;text-align:right;white-space:nowrap}
+    .payrow.total{background:#20261d}.payrow.total .amount{color:var(--accent);font-size:18px}
+    .settings{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field label{font-size:12px;color:var(--muted)}
+    .field input{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:11px;color:var(--text);padding:11px;min-width:0}
+    .footnote{font-size:11px;color:var(--muted);margin-top:10px}
+    .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#f2f3f5;color:#17191f;padding:10px 15px;border-radius:999px;font-size:13px;font-weight:700;box-shadow:0 8px 30px #0008;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center}
+    .toast.show{opacity:1}
+    @media(min-width:600px){.app{padding:28px 22px 48px}.day{min-height:66px}.day .num{font-size:14px}.day .tag{font-size:10px}}
+    @media(max-width:360px){.app{padding:16px 10px 30px}.hero{padding:16px}.stat{padding:11px}.stat .value{font-size:18px}.day{min-height:49px}.day .tag{font-size:8px}.settings{grid-template-columns:1fr 1fr}}
   </style>
 </head>
-
 <body>
-  <main class="container">
-    <header>
-      <h1>Моя зарплата</h1>
-      <div class="subtitle">Облік змін і розрахунок заробітної плати</div>
-    </header>
+<main class="app">
+  <header>
+    <div><div class="eyebrow">Особистий фінансовий інструмент</div><h1>Моя зарплата</h1></div>
+    <div class="offline">● Офлайн-режим</div>
+  </header>
 
-    <section class="panel">
-      <h2>Налаштування</h2>
+  <div class="monthbar">
+    <button class="navbtn" id="prevMonth" aria-label="Попередній місяць">‹</button>
+    <div class="monthname" id="monthTitle">Жовтень 2026</div>
+    <button class="navbtn" id="nextMonth" aria-label="Наступний місяць">›</button>
+  </div>
 
-      <div class="settings-grid">
-        <div>
-          <label for="monthlySalary">Місячна зарплата, грн</label>
-          <input id="monthlySalary" type="number" min="0" step="100"
-                 value="31000">
-        </div>
-        <div>
-          <label for="advance">Аванс, грн</label>
-          <input id="advance" type="number" min="0" step="100"
-                 value="4620">
-        </div>
-        <div>
-          <label for="overtimeRate">Доплата за понаднормові, %</label>
-          <input id="overtimeRate" type="number" min="0" step="1"
-                 value="20">
-        </div>
-        <div>
-          <label for="month">Розрахунковий місяць</label>
-          <input id="month" type="month">
-        </div>
-      </div>
+  <section class="hero">
+    <div class="hero-label">Орієнтовно до виплати 7-го числа</div>
+    <div class="hero-value" id="payout">—</div>
+    <div class="hero-foot">
+      <span class="chip">Аванс 22-го: <strong id="advanceChip">4 620 ₴</strong></span>
+      <span class="chip">Після авансу</span>
+    </div>
+  </section>
 
-      <div class="notice">
-        Графік 5/2. Зміна на 12 годин включає 8 звичайних і
-        4 понаднормові години. Вихідний не оплачується та виключається
-        з кількості робочих днів за графіком.
-      </div>
-    </section>
+  <div class="grid">
+    <div class="stat"><div class="label">Нараховано за місяць</div><div class="value" id="accrued">—</div><div class="note">З урахуванням змін</div></div>
+    <div class="stat"><div class="label">Премія</div><div class="value" id="bonus">—</div><div class="note">Нараховано мінус ставка 12 000 ₴</div></div>
+    <div class="stat"><div class="label">Залишок ставки</div><div class="value" id="baseRemainder">7 380 ₴</div><div class="note">12 000 ₴ − аванс</div></div>
+    <div class="stat"><div class="label">Понаднормові</div><div class="value" id="overtime">—</div><div class="note" id="overtimeHours">0 додаткових годин</div></div>
+  </div>
 
-    <section class="panel">
-      <h2>Календар змін</h2>
-      <div class="month-row">
-        <button id="prevMonth">← Попередній місяць</button>
-        <button id="nextMonth">Наступний місяць →</button>
-      </div>
+  <section class="section">
+    <div class="section-head"><h2>Календар змін</h2><span class="small" id="workdayInfo">5/2</span></div>
+    <div class="actions" style="margin-bottom:9px">
+      <button class="primary" id="all8">Усі зміни — 8 год</button>
+      <button class="secondary" id="all12">Усі зміни — 12 год</button>
+    </div>
+    <div class="calendar">
+      <div class="weekdays"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Нд</span></div>
+      <div class="days" id="calendarDays"></div>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:#a5f36b"></i>8 год</span>
+      <span><i class="dot" style="background:#ffc078"></i>12 год</span>
+      <span><i class="dot" style="background:#ff8888"></i>За свій рахунок</span>
+      <span><i class="dot" style="background:#505662"></i>Вихідний</span>
+    </div>
+    <div class="edit-hint">Натискай на дату, щоб змінити її статус: 8 год → 12 год → за свій рахунок → вихідний.</div>
+  </section>
 
-      <div class="buttons">
-        <button id="all8" class="success">Усі зміни — 8 год</button>
-        <button id="all12" class="primary">Усі зміни — 12 год</button>
-      </div>
+  <section class="section">
+    <div class="section-head"><h2>Деталізація виплат</h2><span class="small">гривні</span></div>
+    <div class="payrows">
+      <div class="payrow"><div class="name">Базова ставка за місяць</div><div class="amount" id="baseSalary">31 000 ₴</div></div>
+      <div class="payrow"><div class="name">Доплата за понаднормові</div><div class="amount" id="overtimeRow">—</div></div>
+      <div class="payrow"><div class="name">Утримання за неоплачувані дні</div><div class="amount" id="deduction">—</div></div>
+      <div class="payrow"><div class="name">Аванс, виплата 22-го</div><div class="amount" id="advanceRow">−4 620 ₴</div></div>
+      <div class="payrow"><div class="name">Премія (розрахункова)</div><div class="amount" id="bonusRow">—</div></div>
+      <div class="payrow total"><div class="name">Залишок до виплати 7-го</div><div class="amount" id="payoutRow">—</div></div>
+    </div>
+    <p class="footnote">Це розрахункова модель за введеними правилами, без податків та інших можливих утримань. Премія показана як нарахована сума понад ставку 12 000 ₴; якщо результат від'ємний, це відображається як коригування.</p>
+  </section>
 
-      <p class="muted">
-        Натискай на день, щоб змінити статус:
-        8 год → 12 год → за свій рахунок → вихідний.
-      </p>
-
-      <div class="calendar-head">
-        <span>Пн</span><span>Вт</span><span>Ср</span>
-        <span>Чт</span><span>Пт</span><span>Сб</span><span>Нд</span>
-      </div>
-      <div id="calendar" class="calendar"></div>
-
-      <div class="legend">
-        <span class="l8">8 год</span>
-        <span class="l12">12 год</span>
-        <span class="lu">За свій рахунок</span>
-        <span class="lr">Вихідний</span>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Підсумок за місяць</h2>
-      <div class="summary-grid">
-        <div class="stat">
-          <div class="stat-label">Робочих днів за графіком</div>
-          <div class="stat-value" id="workingDays">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Відпрацьовано днів</div>
-          <div class="stat-value" id="workedDays">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Звичайних годин</div>
-          <div class="stat-value" id="regularHours">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Понаднормових годин</div>
-          <div class="stat-value" id="overtimeHours">—</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Розрахунок зарплати</h2>
-
-      <div class="result-row">
-        <span>Оплата за звичайні години</span>
-        <strong id="regularPay">—</strong>
-      </div>
-      <div class="result-row">
-        <span>Доплата за понаднормові</span>
-        <strong id="overtimePay">—</strong>
-      </div>
-      <div class="result-row">
-        <span>За свій рахунок</span>
-        <strong id="unpaidDays">—</strong>
-      </div>
-      <div class="result-row">
-        <span>Розрахункова ставка за годину</span>
-        <strong id="hourlyRate">—</strong>
-      </div>
-      <div class="result-row">
-        <span>Аванс</span>
-        <strong id="advanceResult">—</strong>
-      </div>
-      <div class="result-row">
-        <span>Залишок після авансу</span>
-        <strong id="remainder">—</strong>
-      </div>
-
-      <div class="stat highlight" style="margin-top:14px">
-        <div class="stat-label">Зарплата за місяць</div>
-        <div class="stat-value" id="totalSalary">—</div>
-      </div>
-
-      <div class="notice">
-        Розрахунок орієнтовний, до податків та інших утримань.
-        Залишок після авансу може бути від’ємним, якщо аванс
-        перевищує розраховану зарплату.
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Дані</h2>
-      <div class="buttons">
-        <button id="resetMonth" class="danger">Скинути позначки місяця</button>
-      </div>
-      <p class="notice">
-        Позначки зберігаються окремо для кожного місяця на цьому пристрої.
-      </p>
-      <div id="saveStatus" class="subtitle" aria-live="polite">
-        Дані зберігаються автоматично.
-      </div>
-    </section>
-
-    <footer>Моя зарплата · локальний розрахунок</footer>
-  </main>
-
-  <script>
-    (() => {
-      "use strict";
-
-      const STORAGE_KEY = "moja-zarplata-v2";
-      const $ = id => document.getElementById(id);
-
-      const statusLabels = {
-        "8": "8 год",
-        "12": "12 год",
-        "unpaid": "За свій рахунок",
-        "rest": "Вихідний"
-      };
-
-      const statusClasses = {
-        "8": "s8",
-        "12": "s12",
-        "unpaid": "unpaid",
-        "rest": "rest"
-      };
-
-      let appData = {
-        settings: {
-          monthlySalary: 31000,
-          advance: 4620,
-          overtimeRate: 20
-        },
-        months: {}
-      };
-
-      function loadData() {
-        try {
-          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-          if (saved && typeof saved === "object") {
-            appData.settings = {
-              ...appData.settings,
-              ...(saved.settings || {})
-            };
-            appData.months = saved.months || {};
-          }
-        } catch (error) {
-          console.warn("Не вдалося прочитати збережені дані.", error);
-        }
-
-        $("monthlySalary").value = appData.settings.monthlySalary;
-        $("advance").value = appData.settings.advance;
-        $("overtimeRate").value = appData.settings.overtimeRate;
-      }
-
-      function saveData() {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-          $("saveStatus").textContent = "Збережено автоматично.";
-        } catch (error) {
-          $("saveStatus").textContent =
-            "Не вдалося зберегти дані на пристрої.";
-          console.error(error);
-        }
-      }
-
-      function selectedMonth() {
-        return $("month").value;
-      }
-
-      function daysInMonth(monthKey = selectedMonth()) {
-        if (!monthKey) return 30;
-        const [year, month] = monthKey.split("-").map(Number);
-        return new Date(year, month, 0).getDate();
-      }
-
-      function isWeekday(day, monthKey = selectedMonth()) {
-        const [year, month] = monthKey.split("-").map(Number);
-        const weekday = new Date(year, month - 1, day).getDay();
-        return weekday !== 0 && weekday !== 6;
-      }
-
-      function getMonthData(monthKey = selectedMonth()) {
-        if (!appData.months[monthKey]) {
-          const days = {};
-          for (let day = 1; day <= daysInMonth(monthKey); day++) {
-            days[day] = isWeekday(day, monthKey) ? "8" : "rest";
-          }
-          appData.months[monthKey] = days;
-        }
-
-        const monthData = appData.months[monthKey];
-
-        for (let day = 1; day <= daysInMonth(monthKey); day++) {
-          if (!monthData[day]) {
-            monthData[day] = isWeekday(day, monthKey) ? "8" : "rest";
-          }
-        }
-
-        return monthData;
-      }
-
-      function money(value) {
-        return new Intl.NumberFormat("uk-UA", {
-          style: "currency",
-          currency: "UAH",
-          maximumFractionDigits: 2
-        }).format(Number.isFinite(value) ? value : 0);
-      }
-
-      function numberValue(id, fallback = 0) {
-        const value = Number($(id).value);
-        return Number.isFinite(value) && value >= 0 ? value : fallback;
-      }
-
-      function syncSettings() {
-        appData.settings.monthlySalary = numberValue("monthlySalary", 31000);
-        appData.settings.advance = numberValue("advance", 4620);
-        appData.settings.overtimeRate = numberValue("overtimeRate", 20);
-        saveData();
-        calculate();
-      }
-
-      function renderCalendar() {
-        const monthKey = selectedMonth();
-        if (!monthKey) return;
-
-        const [year, month] = monthKey.split("-").map(Number);
-        const totalDays = daysInMonth(monthKey);
-        const firstDay = new Date(year, month - 1, 1).getDay();
-        const mondayOffset = (firstDay + 6) % 7;
-        const days = getMonthData(monthKey);
-        const calendar = $("calendar");
-
-        calendar.replaceChildren();
-
-        for (let i = 0; i < mondayOffset; i++) {
-          const empty = document.createElement("div");
-          empty.className = "day empty";
-          empty.setAttribute("aria-hidden", "true");
-          calendar.appendChild(empty);
-        }
-
-        for (let day = 1; day <= totalDays; day++) {
-          const status = days[day];
-          const button = document.createElement("button");
-          const weekend = !isWeekday(day, monthKey);
-
-          button.type = "button";
-          button.className = "day " + statusClasses[status] +
-            (weekend ? " weekend" : "");
-          button.setAttribute(
-            "aria-label",
-            day + ": " + (statusLabels[status] || status)
-          );
-          button.title = "Натисни, щоб змінити статус дня";
-
-          const dayNumber = document.createElement("span");
-          dayNumber.className = "day-number";
-          dayNumber.textContent = day;
-
-          const dayStatus = document.createElement("span");
-          dayStatus.className = "day-status";
-          dayStatus.textContent = status === "unpaid"
-            ? "Свій рах."
-            : statusLabels[status];
-
-          button.append(dayNumber, dayStatus);
-
-          button.addEventListener("click", () => {
-            const sequence = ["8", "12", "unpaid", "rest"];
-            const currentIndex = sequence.indexOf(days[day]);
-            days[day] = sequence[(currentIndex + 1) % sequence.length];
-            saveData();
-            renderCalendar();
-            calculate();
-          });
-
-          calendar.appendChild(button);
-        }
-      }
-
-      function calculate() {
-        const monthKey = selectedMonth();
-        if (!monthKey) return;
-
-        const days = getMonthData(monthKey);
-        const totalDays = daysInMonth(monthKey);
-        const monthlySalary = numberValue("monthlySalary", 31000);
-        const advance = numberValue("advance", 4620);
-        const overtimeRate = numberValue("overtimeRate", 20);
-
-        // Враховуємо будні, крім звичайних вихідних.
-        // "За свій рахунок" залишається робочим днем графіка.
-        const workingDays = Array.from(
-          { length: totalDays },
-          (_, index) => index + 1
-        ).filter(day =>
-          isWeekday(day, monthKey) && days[day] !== "rest"
-        ).length;
-
-        const hourlyRate = workingDays > 0
-          ? monthlySalary / workingDays / 8
-          : 0;
-
-        let workedDays = 0;
-        let regularHours = 0;
-        let overtimeHours = 0;
-        let unpaidCount = 0;
-
-        for (let day = 1; day <= totalDays; day++) {
-          if (!isWeekday(day, monthKey)) continue;
-
-          switch (days[day]) {
-            case "8":
-              workedDays++;
-              regularHours += 8;
-              break;
-            case "12":
-              workedDays++;
-              regularHours += 8;
-              overtimeHours += 4;
-              break;
-            case "unpaid":
-              unpaidCount++;
-              break;
-          }
-        }
-
-        const regularPay = regularHours * hourlyRate;
-        const overtimePay = overtimeHours * hourlyRate *
-          (1 + overtimeRate / 100);
-        const totalSalary = regularPay + overtimePay;
-        const remainder = totalSalary - advance;
-
-        $("workingDays").textContent = workingDays;
-        $("workedDays").textContent = workedDays;
-        $("regularHours").textContent = regularHours;
-        $("overtimeHours").textContent = overtimeHours;
-        $("regularPay").textContent = money(regularPay);
-        $("overtimePay").textContent = money(overtimePay);
-        $("unpaidDays").textContent = unpaidCount + " дн.";
-        $("hourlyRate").textContent = money(hourlyRate);
-        $("advanceResult").textContent = money(advance);
-        $("remainder").textContent = money(remainder);
-        $("totalSalary").textContent = money(totalSalary);
-      }
-
-      function render() {
-        renderCalendar();
-        calculate();
-      }
-
-      function changeMonth(offset) {
-        const input = $("month");
-        const [year, month] = input.value.split("-").map(Number);
-        const date = new Date(year, month - 1 + offset, 1);
-        input.value = [
-          date.getFullYear(),
-          String(date.getMonth() + 1).padStart(2, "0")
-        ].join("-");
-        getMonthData();
-        saveData();
-        render();
-      }
-
-      $("month").value = (() => {
-        const now = new Date();
-        return now.getFullYear() + "-" +
-          String(now.getMonth() + 1).padStart(2, "0");
-      })();
-
-      loadData();
-      getMonthData();
-      render();
-
-      $("monthlySalary").addEventListener("change", syncSettings);
-      $("advance").addEventListener("change", syncSettings);
-      $("overtimeRate").addEventListener("change", syncSettings);
-
-      $("month").addEventListener("change", () => {
-        getMonthData();
-        saveData();
-        render();
-      });
-
-      $("prevMonth").addEventListener("click", () => changeMonth(-1));
-      $("nextMonth").addEventListener("click", () => changeMonth(1));
-
-      $("all8").addEventListener("click", () => {
-        const days = getMonthData();
-        for (let day = 1; day <= daysInMonth(); day++) {
-          if (isWeekday(day)) days[day] = "8";
-        }
-        saveData();
-        render();
-      });
-
-      $("all12").addEventListener("click", () => {
-        const days = getMonthData();
-        for (let day = 1; day <= daysInMonth(); day++) {
-          if (isWeekday(day)) days[day] = "12";
-        }
-        saveData();
-        render();
-      });
-
-      $("resetMonth").addEventListener("click", () => {
-        if (!confirm("Скинути позначки всіх днів цього місяц
+  <section class="section">
+    <div class="section-head"><h2>Параметри</h2><button id="resetSettings" style="min-height:34px;padding:5px 9px;font-size:12px">За замовчуванням</button></div>
+    <div class="settings">
+      <div class="field"><label for="salaryInput">Базова зарплата (₴)</label><input id="salaryInput" type="number" min="0" step="100" value="31000"></div>
+      <div class="field"><label for="stakeInput">Ставка (₴)</label><input id="stakeInput" type="number" min="0" step="100" value="12000"></div>
+      <div class="field"><label for="advanceInput">Аванс (₴)</label><input id="advanceInput" type="number" min="0" step="100" value="4620"></div>
+      <div class="field"><label for="coefInput">Коефіцієнт понаднормових</label><input id="coefInput" type="number" min="1" max="3" step="0.05" value="1.2"></div>
+    </div>
+    <p class="footnote">Зміни та параметри зберігаються на цьому пристрої окремо для кожного місяця. Перехід на інший місяць не переносить позначки попереднього місяця.</p>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const money = n => new Intl.NumberFormat('uk-UA',{style:'currency',currency:'UAH',maximumFractionDigits:2}).format(n);
+  const monthFmt = new Intl.DateTimeFormat('uk-UA',{month:'long',year:'numeric'});
+  const today = new Date();
+  let year = today.getFullYear(), month = today.getMonth();
+  const defaults = {salary:31000, stake:12000, advance:4620, coef:1.2};
+  let settings = {...defaults};
+  let records = {};
+  let days = {};
+  const monthKey = (y,m) => `${y}-${String(m+1).padStart(2,'0')}`;
+  const key = () => monthKey(year,month);
+  const isWeekday = d => { const wd = new Date(year,month,d).getDay(); return wd >= 1 && wd <= 5; };
+  const daysInMonth = () => new Date(year,month+1,0).getDate();
+  const loadSettings = () => {
+    try { settings = {...defaults, ...(JSON.parse(localStorage.getItem('salaryPwaSettings')||'{}'))}; } catch {}
+    $('salaryInput').value=settings.salary; $('stakeInput').value=settings.stake;
+    $('advanceInput').value=settings.advance; $('coefInput').value=settings.coef;
+  };
+  const saveSettings = () => {
+    settings.salary=Math.max(0,Number($('salaryInput').value)||0);
+    settings.stake=Math.max(0,Number($('stakeInput').value)||0);
+    settings.advance=Math.max(0,Number($('advanceInput').value)||0);
+    settings.coef=Math.max(1,Number($('coefInput').value)||1.2);
+    localStorage.setItem('salaryPwaSettings',JSON.stringify(settings));
+    render();
+  };
+  function initMonth() {
+    const k=key();
+    if (records[k]) days={...records[k]};
+    else {
+      days={};
+      for(let d=1;d<=daysInMonth();d++) days[d]=isWeekday(d)?'8':'rest';
+    }
+    render();
+  }
+  function saveMonth(){ records[key()]={...days}; localStorage.setItem('salaryPwaMonths',JSON.stringify(records)); }
+  function cycleDay(d){
+    const sequence=['8','12','unpaid','rest'];
+    const current=days[d]||'rest';
+    days[d]=sequence[(sequence.indexOf(current)+1)%sequence.length];
+    saveMonth(); render();
+  }
+  function compute(){
+    const workingDays=Array.from({length:daysInMonth()},(_,i)=>i+1).filter(isWeekday).length;
+    const hourly=workingDays ? settings.salary/(workingDays*8) : 0;
+    let overtimeHours=0, unpaidDays=0, shifts8=0, shifts12=0;
+    for(let d=1;d<=daysInMonth();d++){
+      if(days[d]==='12'){overtimeHours+=4;shifts12++;}
+      else if(days[d]==='8') shifts8++;
+      else if(days[d]==='unpaid') unpaidDays++;
+    }
+    const overtime=hourly*overtimeHours*settings.coef;
+    const deduction=hourly*8*unpaidDays;
+    const accrued=settings.salary+overtime-deduction;
+    const bonus=accrued-settings.stake;
+    const payout=accrued-settings.advance;
+    return {workingDays,hourly,overtimeHours,unpaidDays,shifts8,shifts12,overtime,deduction,accrued,bonus,payout};
+  }
+  function renderCalendar(){
+    $('calendarDays').innerHTML='';
+    const first=(new Date(year,month,1).getDay()+6)%7;
+    for(let i=0;i<first;i++){const e=document.createElement('div');e.className='day empty';$('calendarDays').append(e);}
+    for(let d=1;d<=daysInMonth();d++){
+      const status=days[d]||'rest';
+      const b=document.createElement('button');b.className=`day ${status==='8'?'s8':status==='12'?'s12':status==='unpaid'?'unpaid':'rest'}`;
+      if(year===today.getFullYear()&&month===today.getMonth()&&d===today.getDate()) b.classList.add('today');
+      const tag=status==='8'?'8 год':status==='12'?'12 год':status==='unpaid'?'за свій':'вихідний';
+      b.innerHTML=`<span class="num">${d}</span><span class="tag">${tag}</span>`;
+      b.setAttribute('aria-label',`${d}: ${tag}`);b.addEventListener('click',()=>cycleDay(d));
+      $('calendarDays').append(b);
+    }
+  }
+  function render(){
+    $('monthTitle').textContent=monthFmt.format(new Date(year,month,1));
+    const c=compute();
+    $('payout').textContent=money(c.payout);
+    $('advanceChip').textContent=money(settings.advance);
+    $('accrued').textContent=money(c.accrued);
+    $('bonus').textContent=money(c.bonus);
+    $('baseRemainder').textContent=money(settings.stake-settings.advance);
+    $('overtime').textContent=money(c.overtime);
+    $('overtimeHours').textContent=`${c.overtimeHours} додаткових годин`;
+    $('workdayInfo').textContent=`Графік 5/2 · буднів у місяці: ${c.workingDays}`;
+    $('baseSalary').textContent=money(settings.salary);
+    $('overtimeRow').textContent=`+${money(c.overtime)}`;
+    $('deduction').textContent=`−${money(c.deduction)}`;
+    $('advanceRow').textContent=`−${money(settings.advance)}`;
+    $('bonusRow').textContent=money(c.bonus);
+    $('payoutRow').textContent=money(c.payout);
+    renderCalendar();
+  }
+  function massSet(status){
+    for(let d=1;d<=daysInMonth();d++) if(isWeekday(d)) days[d]=status;
+    saveMonth();render();showToast(status==='8'?'Усі будні встановлено на 8 годин':'Усі будні встановлено на 12 годин');
+  }
+  function showToast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove('show'),1800);}
+  $('prevMonth').addEventListener('click',()=>{month--;if(month<0){month=11;year--;}initMonth();});
+  $('nextMonth').addEventListener('click',()=>{month++;if(month>11){month=0;year++;}initMonth();});
+  $('all8').addEventListener('click',()=>massSet('8'));
+  $('all12').addEventListener('click',()=>massSet('12'));
+  ['salaryInput','stakeInput','advanceInput','coefInput'].forEach(id=>$(id).addEventListener('change',saveSettings));
+  $('resetSettings').addEventListener('click',()=>{settings={...defaults};localStorage.setItem('salaryPwaSettings',JSON.stringify(settings));loadSettings();render();showToast('Параметри відновлено');});
+  try { records=JSON.parse(localStorage.getItem('salaryPwaMonths')||'{}')||{}; } catch { records={}; }
+  loadSettings();initMonth();
+  if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>
