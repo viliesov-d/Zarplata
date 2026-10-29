@@ -4,24 +4,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101114">
-  <meta name="description" content="Особистий калькулятор зарплати">
-  <title>Моя зарплата</title>
+  <meta name="theme-color" content="#111827">
+  <meta name="description" content="Розрахунок заробітної плати та облік робочих змін">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <title>Моя зарплата</title>
 
   <style>
     :root {
       color-scheme: dark;
-      --bg: #101114;
-      --panel: #191b20;
-      --panel2: #22252c;
-      --text: #f2f3f5;
-      --muted: #9da3b0;
-      --accent: #8b9cff;
-      --green: #64d7a0;
-      --red: #ff8585;
-      --border: #30343d;
+      --bg: #111827;
+      --panel: #1f2937;
+      --panel2: #273449;
+      --border: #374151;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #60a5fa;
+      --green: #34d399;
+      --orange: #fbbf24;
+      --red: #f87171;
     }
 
     * { box-sizing: border-box; }
@@ -30,755 +30,715 @@
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
       padding: 16px;
     }
 
-    main {
-      max-width: 760px;
-      margin: 0 auto;
+    header {
+      padding: 8px 0 18px;
     }
 
-    header { margin-bottom: 22px; }
-
     h1 {
-      font-size: 29px;
       margin: 0 0 5px;
-      letter-spacing: -0.8px;
+      font-size: 27px;
     }
 
     h2 {
+      margin: 0 0 14px;
       font-size: 18px;
-      margin: 0 0 15px;
     }
 
-    .muted { color: var(--muted); }
+    .subtitle, .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
 
     .panel {
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 17px;
-      margin-bottom: 15px;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
     }
 
-    .month-row {
-      display: grid;
-      grid-template-columns: 48px 1fr 48px;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .month-row button { padding: 10px; }
-
-    #monthTitle {
-      text-align: center;
-      font-weight: 700;
-      font-size: 18px;
-      text-transform: capitalize;
-    }
-
-    button, select, input {
-      font: inherit;
-    }
-
-    button {
-      color: var(--text);
-      background: var(--panel2);
-      border: 1px solid var(--border);
-      border-radius: 11px;
-      padding: 11px 13px;
-      cursor: pointer;
-    }
-
-    button:active { transform: scale(.98); }
-
-    button.primary {
-      background: var(--accent);
-      color: #11131a;
-      border-color: transparent;
-      font-weight: 700;
-    }
-
-    button.green {
-      border-color: #326c52;
-      color: var(--green);
-    }
-
-    button.red {
-      border-color: #754242;
-      color: var(--red);
-    }
-
-    .calendar {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 6px;
-    }
-
-    .weekday {
-      text-align: center;
-      color: var(--muted);
-      font-size: 12px;
-      padding: 5px 0;
-    }
-
-    .day {
-      min-width: 0;
-      min-height: 70px;
-      padding: 7px 2px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      gap: 5px;
-      border-radius: 10px;
-      font-size: 13px;
-    }
-
-    .day .number {
-      font-weight: 700;
-      font-size: 15px;
-    }
-
-    .day .status {
-      font-size: 10px;
-      line-height: 1.2;
-      text-align: center;
-      overflow-wrap: anywhere;
-    }
-
-    .day.s8 {
-      background: #1d3b31;
-      border-color: #326c52;
-    }
-
-    .day.s12 {
-      background: #24334e;
-      border-color: #3e5c91;
-    }
-
-    .day.unpaid {
-      background: #493620;
-      border-color: #8a6533;
-    }
-
-    .day.rest {
-      background: #292b31;
-      color: #a5a9b2;
-    }
-
-    .day.today {
-      outline: 2px solid var(--accent);
-      outline-offset: 1px;
-    }
-
-    .empty { visibility: hidden; }
-
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 13px;
-      margin-top: 15px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .legend span { display: flex; align-items: center; gap: 5px; }
-
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 3px;
-      display: inline-block;
-    }
-
-    .actions {
+    .settings-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 9px;
-      margin-top: 14px;
-    }
-
-    .settings {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 13px;
+      gap: 12px;
     }
 
     label {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-      font-size: 13px;
+      display: block;
+      margin-bottom: 6px;
       color: var(--muted);
+      font-size: 13px;
     }
 
     input, select {
       width: 100%;
-      min-width: 0;
-      padding: 12px;
-      color: var(--text);
-      background: var(--panel2);
+      min-height: 42px;
+      padding: 9px 10px;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 8px;
+      background: #111827;
+      color: var(--text);
+      font: inherit;
     }
 
-    .stats {
+    button {
+      min-height: 40px;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel2);
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button:active { opacity: .75; }
+
+    button.primary {
+      background: #2563eb;
+      border-color: #2563eb;
+    }
+
+    button.success {
+      border-color: #047857;
+      background: #064e3b;
+    }
+
+    button.warning {
+      border-color: #92400e;
+      background: #78350f;
+    }
+
+    button.danger {
+      border-color: #991b1b;
+      background: #7f1d1d;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .month-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .summary-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
     }
 
     .stat {
-      background: var(--panel2);
-      border-radius: 13px;
-      padding: 14px;
+      background: #111827;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px;
       min-width: 0;
     }
 
-    .stat .label {
+    .stat-label {
       color: var(--muted);
       font-size: 12px;
       margin-bottom: 7px;
     }
 
-    .stat .value {
-      font-size: clamp(17px, 4.6vw, 23px);
-      font-weight: 750;
+    .stat-value {
+      font-size: 21px;
+      font-weight: bold;
       overflow-wrap: anywhere;
     }
 
-    .stat.highlight { border: 1px solid #4b598b; }
+    .highlight .stat-value { color: var(--green); }
 
-    .wide { grid-column: 1 / -1; }
-
-    .note {
-      font-size: 12px;
-      line-height: 1.5;
-      color: var(--muted);
-      margin-top: 12px;
+    .calendar-head, .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 5px;
     }
 
-    .section-title {
+    .calendar-head {
+      margin-bottom: 7px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .day {
+      min-width: 0;
+      min-height: 66px;
+      padding: 5px 1px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #111827;
+    }
+
+    .day.empty {
+      border-color: transparent;
+      background: transparent;
+      cursor: default;
+    }
+
+    .day-number { font-size: 13px; }
+
+    .day-status {
+      font-size: 11px;
+      font-weight: bold;
+      overflow-wrap: anywhere;
+    }
+
+    .day.s8 {
+      border-color: #047857;
+      background: #064e3b;
+    }
+
+    .day.s12 {
+      border-color: #1d4ed8;
+      background: #1e3a8a;
+    }
+
+    .day.unpaid {
+      border-color: #92400e;
+      background: #78350f;
+    }
+
+    .day.rest {
+      color: #9ca3af;
+      background: #1f2937;
+    }
+
+    .day.weekend .day-number { color: var(--muted); }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend span::before {
+      content: "";
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      margin-right: 5px;
+      border-radius: 3px;
+      background: currentColor;
+    }
+
+    .legend .l8 { color: var(--green); }
+    .legend .l12 { color: var(--accent); }
+    .legend .lu { color: var(--orange); }
+    .legend .lr { color: var(--muted); }
+
+    .result-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      gap: 10px;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
     }
 
-    .section-title small {
+    .result-row:last-child { border-bottom: 0; }
+    .result-row span:first-child { color: var(--muted); }
+    .result-row strong { text-align: right; }
+
+    .notice {
+      margin-top: 10px;
       color: var(--muted);
       font-size: 12px;
     }
 
-    @media (max-width: 390px) {
-      body { padding: 10px; }
+    footer {
+      padding: 8px 0 22px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 420px) {
+      .container { padding: 10px; }
       .panel { padding: 12px; }
-      .calendar { gap: 4px; }
-      .day { min-height: 62px; }
-      .settings { grid-template-columns: 1fr; }
-      .actions button { padding: 10px 6px; font-size: 12px; }
+      h1 { font-size: 24px; }
+      .day { min-height: 57px; }
+      .day-status { font-size: 10px; }
+      .stat-value { font-size: 18px; }
+      .calendar, .calendar-head { gap: 3px; }
     }
   </style>
 </head>
 
 <body>
-<main>
-  <header>
-    <h1>Моя зарплата</h1>
-    <div class="muted">Особистий калькулятор заробітної плати</div>
-  </header>
+  <main class="container">
+    <header>
+      <h1>Моя зарплата</h1>
+      <div class="subtitle">Облік змін і розрахунок заробітної плати</div>
+    </header>
 
-  <section class="panel">
-    <div class="month-row">
-      <button id="prevMonth" aria-label="Попередній місяць">‹</button>
-      <div id="monthTitle"></div>
-      <button id="nextMonth" aria-label="Наступний місяць">›</button>
-    </div>
+    <section class="panel">
+      <h2>Налаштування</h2>
 
-    <div class="calendar" id="calendar"></div>
-
-    <div class="legend">
-      <span><i class="dot" style="background:#326c52"></i>8 год</span>
-      <span><i class="dot" style="background:#3e5c91"></i>12 год</span>
-      <span><i class="dot" style="background:#8a6533"></i>За свій рахунок</span>
-      <span><i class="dot" style="background:#555963"></i>Вихідний</span>
-    </div>
-
-    <div class="actions">
-      <button id="all8">Усі будні — 8 год</button>
-      <button id="all12">Усі будні — 12 год</button>
-      <button id="allRest">Усі будні — вихідні</button>
-      <button id="resetMonth">Скинути місяць</button>
-    </div>
-
-    <p class="note">
-      Натискай на день, щоб змінити його статус.
-      Порядок: 8 год → 12 год → за свій рахунок → вихідний → 8 год.
-      Дані зберігаються на цьому пристрої.
-    </p>
-  </section>
-
-  <section class="panel">
-    <h2>Налаштування зарплати</h2>
-
-    <div class="settings">
-      <label>
-        Місячна зарплата, грн
-        <input id="baseSalary" type="number" min="0" step="100" value="31000">
-      </label>
-
-      <label>
-        Аванс, грн
-        <input id="advance" type="number" min="0" step="10" value="4620">
-      </label>
-
-      <label>
-        Основна ставка, грн
-        <input id="baseStake" type="number" min="0" step="100" value="12000">
-      </label>
-
-      <label>
-        Доплата за понаднормові, %
-        <input id="overtimeRate" type="number" min="0" max="300" step="5" value="20">
-      </label>
-    </div>
-
-    <p class="note">
-      Погодинна ставка = місячна зарплата ÷ робочі дні за графіком ÷ 8.
-      Для 12-годинної зміни додаткові 4 години оплачуються з надбавкою.
-    </p>
-  </section>
-
-  <section class="panel">
-    <div class="section-title">
-      <h2>Результат розрахунку</h2>
-      <small id="workdayInfo"></small>
-    </div>
-
-    <div class="stats">
-      <div class="stat">
-        <div class="label">Робочих днів за графіком</div>
-        <div class="value" id="workdays">0</div>
+      <div class="settings-grid">
+        <div>
+          <label for="monthlySalary">Місячна зарплата, грн</label>
+          <input id="monthlySalary" type="number" min="0" step="100"
+                 value="31000">
+        </div>
+        <div>
+          <label for="advance">Аванс, грн</label>
+          <input id="advance" type="number" min="0" step="100"
+                 value="4620">
+        </div>
+        <div>
+          <label for="overtimeRate">Доплата за понаднормові, %</label>
+          <input id="overtimeRate" type="number" min="0" step="1"
+                 value="20">
+        </div>
+        <div>
+          <label for="month">Розрахунковий місяць</label>
+          <input id="month" type="month">
+        </div>
       </div>
 
-      <div class="stat">
-        <div class="label">Погодинна ставка</div>
-        <div class="value" id="hourlyRate">0 ₴</div>
+      <div class="notice">
+        Графік 5/2. Зміна на 12 годин включає 8 звичайних і
+        4 понаднормові години. Вихідний не оплачується та виключається
+        з кількості робочих днів за графіком.
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Календар змін</h2>
+      <div class="month-row">
+        <button id="prevMonth">← Попередній місяць</button>
+        <button id="nextMonth">Наступний місяць →</button>
       </div>
 
-      <div class="stat">
-        <div class="label">Відпрацьовано годин</div>
-        <div class="value" id="hours">0</div>
+      <div class="buttons">
+        <button id="all8" class="success">Усі зміни — 8 год</button>
+        <button id="all12" class="primary">Усі зміни — 12 год</button>
       </div>
 
-      <div class="stat">
-        <div class="label">Понаднормові години</div>
-        <div class="value" id="overtimeHours">0</div>
+      <p class="muted">
+        Натискай на день, щоб змінити статус:
+        8 год → 12 год → за свій рахунок → вихідний.
+      </p>
+
+      <div class="calendar-head">
+        <span>Пн</span><span>Вт</span><span>Ср</span>
+        <span>Чт</span><span>Пт</span><span>Сб</span><span>Нд</span>
+      </div>
+      <div id="calendar" class="calendar"></div>
+
+      <div class="legend">
+        <span class="l8">8 год</span>
+        <span class="l12">12 год</span>
+        <span class="lu">За свій рахунок</span>
+        <span class="lr">Вихідний</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Підсумок за місяць</h2>
+      <div class="summary-grid">
+        <div class="stat">
+          <div class="stat-label">Робочих днів за графіком</div>
+          <div class="stat-value" id="workingDays">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Відпрацьовано днів</div>
+          <div class="stat-value" id="workedDays">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Звичайних годин</div>
+          <div class="stat-value" id="regularHours">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Понаднормових годин</div>
+          <div class="stat-value" id="overtimeHours">—</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Розрахунок зарплати</h2>
+
+      <div class="result-row">
+        <span>Оплата за звичайні години</span>
+        <strong id="regularPay">—</strong>
+      </div>
+      <div class="result-row">
+        <span>Доплата за понаднормові</span>
+        <strong id="overtimePay">—</strong>
+      </div>
+      <div class="result-row">
+        <span>За свій рахунок</span>
+        <strong id="unpaidDays">—</strong>
+      </div>
+      <div class="result-row">
+        <span>Розрахункова ставка за годину</span>
+        <strong id="hourlyRate">—</strong>
+      </div>
+      <div class="result-row">
+        <span>Аванс</span>
+        <strong id="advanceResult">—</strong>
+      </div>
+      <div class="result-row">
+        <span>Залишок після авансу</span>
+        <strong id="remainder">—</strong>
       </div>
 
-      <div class="stat highlight wide">
-        <div class="label">Нарахована зарплата</div>
-        <div class="value" id="accrued">0 ₴</div>
+      <div class="stat highlight" style="margin-top:14px">
+        <div class="stat-label">Зарплата за місяць</div>
+        <div class="stat-value" id="totalSalary">—</div>
       </div>
 
-      <div class="stat">
-        <div class="label">Аванс</div>
-        <div class="value" id="advanceResult">0 ₴</div>
+      <div class="notice">
+        Розрахунок орієнтовний, до податків та інших утримань.
+        Залишок після авансу може бути від’ємним, якщо аванс
+        перевищує розраховану зарплату.
       </div>
+    </section>
 
-      <div class="stat">
-        <div class="label">Залишок основної ставки</div>
-        <div class="value" id="stakeRemainder">0 ₴</div>
+    <section class="panel">
+      <h2>Дані</h2>
+      <div class="buttons">
+        <button id="resetMonth" class="danger">Скинути позначки місяця</button>
       </div>
-
-      <div class="stat">
-        <div class="label">Премія</div>
-        <div class="value" id="bonus">0 ₴</div>
+      <p class="notice">
+        Позначки зберігаються окремо для кожного місяця на цьому пристрої.
+      </p>
+      <div id="saveStatus" class="subtitle" aria-live="polite">
+        Дані зберігаються автоматично.
       </div>
+    </section>
 
-      <div class="stat highlight">
-        <div class="label">До виплати 7-го числа</div>
-        <div class="value" id="finalPay">0 ₴</div>
-      </div>
+    <footer>Моя зарплата · локальний розрахунок</footer>
+  </main>
 
-      <div class="stat wide">
-        <div class="label">Відрахування за дні за власний рахунок</div>
-        <div class="value" id="deductions">0 ₴</div>
-      </div>
-    </div>
+  <script>
+    (() => {
+      "use strict";
 
-    <p class="note">
-      Розрахунок попередній: без податків та інших утримань.
-      Премія розраховується як нарахована зарплата мінус основна ставка.
-      Остаточна виплата — нарахована зарплата мінус аванс.
-    </p>
-  </section>
-</main>
+      const STORAGE_KEY = "moja-zarplata-v2";
+      const $ = id => document.getElementById(id);
 
-<script>
-(() => {
-  'use strict';
+      const statusLabels = {
+        "8": "8 год",
+        "12": "12 год",
+        "unpaid": "За свій рахунок",
+        "rest": "Вихідний"
+      };
 
-  const $ = id => document.getElementById(id);
-  const STORAGE_KEY = 'moja-zarplata-v2';
-  const monthNames = [
-    'січень', 'лютий', 'березень', 'квітень',
-    'травень', 'червень', 'липень', 'серпень',
-    'вересень', 'жовтень', 'листопад', 'грудень'
-  ];
-  const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
-  const statuses = ['8', '12', 'unpaid', 'rest'];
+      const statusClasses = {
+        "8": "s8",
+        "12": "s12",
+        "unpaid": "unpaid",
+        "rest": "rest"
+      };
 
-  let viewDate = new Date();
-  viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+      let appData = {
+        settings: {
+          monthlySalary: 31000,
+          advance: 4620,
+          overtimeRate: 20
+        },
+        months: {}
+      };
 
-  let store = loadStore();
+      function loadData() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (saved && typeof saved === "object") {
+            appData.settings = {
+              ...appData.settings,
+              ...(saved.settings || {})
+            };
+            appData.months = saved.months || {};
+          }
+        } catch (error) {
+          console.warn("Не вдалося прочитати збережені дані.", error);
+        }
 
-  function loadStore() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch (error) {
-      console.warn('Не вдалося прочитати локальні дані', error);
-    }
-
-    return {
-      settings: {
-        baseSalary: 31000,
-        advance: 4620,
-        baseStake: 12000,
-        overtimeRate: 20
-      },
-      months: {}
-    };
-  }
-
-  function saveStore() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-    } catch (error) {
-      alert('Не вдалося зберегти дані в браузері.');
-    }
-  }
-
-  function monthKey(date = viewDate) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-  }
-
-  function daysInMonth() {
-    return new Date(
-      viewDate.getFullYear(),
-      viewDate.getMonth() + 1,
-      0
-    ).getDate();
-  }
-
-  function isWeekday(day) {
-    const weekday = new Date(
-      viewDate.getFullYear(),
-      viewDate.getMonth(),
-      day
-    ).getDay();
-
-    return weekday >= 1 && weekday <= 5;
-  }
-
-  function defaultStatus(day) {
-    return isWeekday(day) ? '8' : 'rest';
-  }
-
-  function currentDays() {
-    const key = monthKey();
-
-    if (!store.months[key]) {
-      store.months[key] = {};
-    }
-
-    const month = store.months[key];
-
-    for (let day = 1; day <= daysInMonth(); day++) {
-      if (!statuses.includes(month[day])) {
-        month[day] = defaultStatus(day);
-      }
-    }
-
-    return month;
-  }
-
-  function getSettings() {
-    const settings = store.settings || {};
-
-    return {
-      baseSalary: Math.max(0, Number(settings.baseSalary) || 0),
-      advance: Math.max(0, Number(settings.advance) || 0),
-      baseStake: Math.max(0, Number(settings.baseStake) || 0),
-      overtimeRate: Math.max(0, Number(settings.overtimeRate) || 0)
-    };
-  }
-
-  function money(value) {
-    return new Intl.NumberFormat('uk-UA', {
-      style: 'currency',
-      currency: 'UAH',
-      maximumFractionDigits: 2
-    }).format(Number.isFinite(value) ? value : 0);
-  }
-
-  function calculate() {
-    const days = currentDays();
-    const settings = getSettings();
-
-    // ВАЖЛИВО:
-    // звичайний вихідний у будній день НЕ входить до знаменника.
-    // День за власний рахунок входить, бо він був запланованим робочим.
-    const workingDays = Array.from(
-      { length: daysInMonth() },
-      (_, index) => index + 1
-    ).filter(day => isWeekday(day) && days[day] !== 'rest').length;
-
-    const hourlyRate = workingDays > 0
-      ? settings.baseSalary / workingDays / 8
-      : 0;
-
-    let hours = 0;
-    let overtimeHours = 0;
-    let unpaidDays = 0;
-    let regularPay = 0;
-    let overtimePay = 0;
-
-    for (let day = 1; day <= daysInMonth(); day++) {
-      const status = days[day];
-
-      if (!isWeekday(day)) continue;
-
-      if (status === '8') {
-        hours += 8;
-        regularPay += hourlyRate * 8;
-      } else if (status === '12') {
-        hours += 12;
-        overtimeHours += 4;
-        regularPay += hourlyRate * 8;
-        overtimePay += hourlyRate * 4 * (1 + settings.overtimeRate / 100);
-      } else if (status === 'unpaid') {
-        unpaidDays++;
-      }
-    }
-
-    const deductions = unpaidDays * hourlyRate * 8;
-    const accrued = Math.max(0, regularPay + overtimePay);
-    const stakeRemainder = Math.max(0, settings.baseStake - settings.advance);
-    const bonus = Math.max(0, accrued - settings.baseStake);
-    const finalPay = Math.max(0, accrued - settings.advance);
-
-    return {
-      workingDays,
-      hourlyRate,
-      hours,
-      overtimeHours,
-      unpaidDays,
-      deductions,
-      accrued,
-      stakeRemainder,
-      bonus,
-      finalPay
-    };
-  }
-
-  function renderCalendar() {
-    const days = currentDays();
-    const total = daysInMonth();
-    const firstDay = new Date(
-      viewDate.getFullYear(),
-      viewDate.getMonth(),
-      1
-    ).getDay();
-
-    const offset = (firstDay + 6) % 7;
-
-    $('monthTitle').textContent =
-      `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
-
-    const calendar = $('calendar');
-    calendar.replaceChildren();
-
-    weekdays.forEach(name => {
-      const cell = document.createElement('div');
-      cell.className = 'weekday';
-      cell.textContent = name;
-      calendar.appendChild(cell);
-    });
-
-    for (let i = 0; i < offset; i++) {
-      const empty = document.createElement('div');
-      empty.className = 'day empty';
-      calendar.appendChild(empty);
-    }
-
-    const today = new Date();
-
-    for (let day = 1; day <= total; day++) {
-      const status = days[day];
-      const button = document.createElement('button');
-      button.className = `day ${statusClass(status)}`;
-
-      if (
-        today.getFullYear() === viewDate.getFullYear() &&
-        today.getMonth() === viewDate.getMonth() &&
-        today.getDate() === day
-      ) {
-        button.classList.add('today');
+        $("monthlySalary").value = appData.settings.monthlySalary;
+        $("advance").value = appData.settings.advance;
+        $("overtimeRate").value = appData.settings.overtimeRate;
       }
 
-      const number = document.createElement('span');
-      number.className = 'number';
-      number.textContent = day;
+      function saveData() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+          $("saveStatus").textContent = "Збережено автоматично.";
+        } catch (error) {
+          $("saveStatus").textContent =
+            "Не вдалося зберегти дані на пристрої.";
+          console.error(error);
+        }
+      }
 
-      const label = document.createElement('span');
-      label.className = 'status';
-      label.textContent = statusLabel(status);
+      function selectedMonth() {
+        return $("month").value;
+      }
 
-      button.append(number, label);
-      button.setAttribute(
-        'aria-label',
-        `${day} ${monthNames[viewDate.getMonth()]}, ${statusLabel(status)}`
-      );
+      function daysInMonth(monthKey = selectedMonth()) {
+        if (!monthKey) return 30;
+        const [year, month] = monthKey.split("-").map(Number);
+        return new Date(year, month, 0).getDate();
+      }
 
-      button.addEventListener('click', () => {
-        const index = statuses.indexOf(days[day]);
-        days[day] = statuses[(index + 1) % statuses.length];
-        saveStore();
+      function isWeekday(day, monthKey = selectedMonth()) {
+        const [year, month] = monthKey.split("-").map(Number);
+        const weekday = new Date(year, month - 1, day).getDay();
+        return weekday !== 0 && weekday !== 6;
+      }
+
+      function getMonthData(monthKey = selectedMonth()) {
+        if (!appData.months[monthKey]) {
+          const days = {};
+          for (let day = 1; day <= daysInMonth(monthKey); day++) {
+            days[day] = isWeekday(day, monthKey) ? "8" : "rest";
+          }
+          appData.months[monthKey] = days;
+        }
+
+        const monthData = appData.months[monthKey];
+
+        for (let day = 1; day <= daysInMonth(monthKey); day++) {
+          if (!monthData[day]) {
+            monthData[day] = isWeekday(day, monthKey) ? "8" : "rest";
+          }
+        }
+
+        return monthData;
+      }
+
+      function money(value) {
+        return new Intl.NumberFormat("uk-UA", {
+          style: "currency",
+          currency: "UAH",
+          maximumFractionDigits: 2
+        }).format(Number.isFinite(value) ? value : 0);
+      }
+
+      function numberValue(id, fallback = 0) {
+        const value = Number($(id).value);
+        return Number.isFinite(value) && value >= 0 ? value : fallback;
+      }
+
+      function syncSettings() {
+        appData.settings.monthlySalary = numberValue("monthlySalary", 31000);
+        appData.settings.advance = numberValue("advance", 4620);
+        appData.settings.overtimeRate = numberValue("overtimeRate", 20);
+        saveData();
+        calculate();
+      }
+
+      function renderCalendar() {
+        const monthKey = selectedMonth();
+        if (!monthKey) return;
+
+        const [year, month] = monthKey.split("-").map(Number);
+        const totalDays = daysInMonth(monthKey);
+        const firstDay = new Date(year, month - 1, 1).getDay();
+        const mondayOffset = (firstDay + 6) % 7;
+        const days = getMonthData(monthKey);
+        const calendar = $("calendar");
+
+        calendar.replaceChildren();
+
+        for (let i = 0; i < mondayOffset; i++) {
+          const empty = document.createElement("div");
+          empty.className = "day empty";
+          empty.setAttribute("aria-hidden", "true");
+          calendar.appendChild(empty);
+        }
+
+        for (let day = 1; day <= totalDays; day++) {
+          const status = days[day];
+          const button = document.createElement("button");
+          const weekend = !isWeekday(day, monthKey);
+
+          button.type = "button";
+          button.className = "day " + statusClasses[status] +
+            (weekend ? " weekend" : "");
+          button.setAttribute(
+            "aria-label",
+            day + ": " + (statusLabels[status] || status)
+          );
+          button.title = "Натисни, щоб змінити статус дня";
+
+          const dayNumber = document.createElement("span");
+          dayNumber.className = "day-number";
+          dayNumber.textContent = day;
+
+          const dayStatus = document.createElement("span");
+          dayStatus.className = "day-status";
+          dayStatus.textContent = status === "unpaid"
+            ? "Свій рах."
+            : statusLabels[status];
+
+          button.append(dayNumber, dayStatus);
+
+          button.addEventListener("click", () => {
+            const sequence = ["8", "12", "unpaid", "rest"];
+            const currentIndex = sequence.indexOf(days[day]);
+            days[day] = sequence[(currentIndex + 1) % sequence.length];
+            saveData();
+            renderCalendar();
+            calculate();
+          });
+
+          calendar.appendChild(button);
+        }
+      }
+
+      function calculate() {
+        const monthKey = selectedMonth();
+        if (!monthKey) return;
+
+        const days = getMonthData(monthKey);
+        const totalDays = daysInMonth(monthKey);
+        const monthlySalary = numberValue("monthlySalary", 31000);
+        const advance = numberValue("advance", 4620);
+        const overtimeRate = numberValue("overtimeRate", 20);
+
+        // Враховуємо будні, крім звичайних вихідних.
+        // "За свій рахунок" залишається робочим днем графіка.
+        const workingDays = Array.from(
+          { length: totalDays },
+          (_, index) => index + 1
+        ).filter(day =>
+          isWeekday(day, monthKey) && days[day] !== "rest"
+        ).length;
+
+        const hourlyRate = workingDays > 0
+          ? monthlySalary / workingDays / 8
+          : 0;
+
+        let workedDays = 0;
+        let regularHours = 0;
+        let overtimeHours = 0;
+        let unpaidCount = 0;
+
+        for (let day = 1; day <= totalDays; day++) {
+          if (!isWeekday(day, monthKey)) continue;
+
+          switch (days[day]) {
+            case "8":
+              workedDays++;
+              regularHours += 8;
+              break;
+            case "12":
+              workedDays++;
+              regularHours += 8;
+              overtimeHours += 4;
+              break;
+            case "unpaid":
+              unpaidCount++;
+              break;
+          }
+        }
+
+        const regularPay = regularHours * hourlyRate;
+        const overtimePay = overtimeHours * hourlyRate *
+          (1 + overtimeRate / 100);
+        const totalSalary = regularPay + overtimePay;
+        const remainder = totalSalary - advance;
+
+        $("workingDays").textContent = workingDays;
+        $("workedDays").textContent = workedDays;
+        $("regularHours").textContent = regularHours;
+        $("overtimeHours").textContent = overtimeHours;
+        $("regularPay").textContent = money(regularPay);
+        $("overtimePay").textContent = money(overtimePay);
+        $("unpaidDays").textContent = unpaidCount + " дн.";
+        $("hourlyRate").textContent = money(hourlyRate);
+        $("advanceResult").textContent = money(advance);
+        $("remainder").textContent = money(remainder);
+        $("totalSalary").textContent = money(totalSalary);
+      }
+
+      function render() {
+        renderCalendar();
+        calculate();
+      }
+
+      function changeMonth(offset) {
+        const input = $("month");
+        const [year, month] = input.value.split("-").map(Number);
+        const date = new Date(year, month - 1 + offset, 1);
+        input.value = [
+          date.getFullYear(),
+          String(date.getMonth() + 1).padStart(2, "0")
+        ].join("-");
+        getMonthData();
+        saveData();
+        render();
+      }
+
+      $("month").value = (() => {
+        const now = new Date();
+        return now.getFullYear() + "-" +
+          String(now.getMonth() + 1).padStart(2, "0");
+      })();
+
+      loadData();
+      getMonthData();
+      render();
+
+      $("monthlySalary").addEventListener("change", syncSettings);
+      $("advance").addEventListener("change", syncSettings);
+      $("overtimeRate").addEventListener("change", syncSettings);
+
+      $("month").addEventListener("change", () => {
+        getMonthData();
+        saveData();
         render();
       });
 
-      calendar.appendChild(button);
-    }
-  }
+      $("prevMonth").addEventListener("click", () => changeMonth(-1));
+      $("nextMonth").addEventListener("click", () => changeMonth(1));
 
-  function statusClass(status) {
-    if (status === '8') return 's8';
-    if (status === '12') return 's12';
-    if (status === 'unpaid') return 'unpaid';
-    return 'rest';
-  }
-
-  function statusLabel(status) {
-    if (status === '8') return '8 год';
-    if (status === '12') return '12 год';
-    if (status === 'unpaid') return 'За свій рах.';
-    return 'Вихідний';
-  }
-
-  function renderResults() {
-    const c = calculate();
-
-    $('workdayInfo').textContent =
-      `Графік 5/2 · робочих днів за графіком: ${c.workingDays}`;
-
-    $('workdays').textContent = c.workingDays;
-    $('hourlyRate').textContent = money(c.hourlyRate);
-    $('hours').textContent = c.hours;
-    $('overtimeHours').textContent = c.overtimeHours;
-    $('accrued').textContent = money(c.accrued);
-    $('advanceResult').textContent = money(getSettings().advance);
-    $('stakeRemainder').textContent = money(c.stakeRemainder);
-    $('bonus').textContent = money(c.bonus);
-    $('finalPay').textContent = money(c.finalPay);
-    $('deductions').textContent = money(c.deductions);
-  }
-
-  function renderSettings() {
-    const settings = getSettings();
-
-    $('baseSalary').value = settings.baseSalary;
-    $('advance').value = settings.advance;
-    $('baseStake').value = settings.baseStake;
-    $('overtimeRate').value = settings.overtimeRate;
-  }
-
-  function render() {
-    renderCalendar();
-    renderResults();
-  }
-
-  function updateSettings() {
-    store.settings = {
-      baseSalary: Number($('baseSalary').value) || 0,
-      advance: Number($('advance').value) || 0,
-      baseStake: Number($('baseStake').value) || 0,
-      overtimeRate: Number($('overtimeRate').value) || 0
-    };
-
-    saveStore();
-    renderResults();
-  }
-
-  function setAllWeekdays(status) {
-    const days = currentDays();
-
-    for (let day = 1; day <= daysInMonth(); day++) {
-      if (isWeekday(day)) {
-        days[day] = status;
-      }
-    }
-
-    saveStore();
-    render();
-  }
-
-  $('prevMonth').addEventListener('click', () => {
-    viewDate = new Date(
-      viewDate.getFullYear(),
-      viewDate.getMonth() - 1,
-      1
-    );
-    render();
-  });
-
-  $('nextMonth').addEventListener('click', () => {
-    viewDate = new Date(
-      viewDate.getFullYear(),
-      viewDate.getMonth() + 1,
-      1
-    );
-    render();
-  });
-
-  $('all8').addEventListener('click', () => setAllWeekdays('8'));
-  $('all12').addEventListener('click', () => setAllWeekdays('12'));
-  $('allRest').addEventListener('click', () => setAllWeekdays('rest'));
-
-  $('resetMonth').addEventListener('click', () => {
-    if (!confirm('Скинути всі позначки цього місяця?')) return;
-
-    store.months[monthKey()] = {};
-
-    for (let day = 1; day <= daysInMonth(); day++) {
-      store.months[monthKey()][day] = defaultStatus(day);
-    }
-
-    saveStore();
-    render();
-  });
-
-  ['baseSalary', 'advance', 'baseStake', 'overtimeRate'].forEach(id => {
-    $(id).addEventListener('input', updateSettings);
-  });
-
-  renderSettings();
-  render();
-
-  // PWA: кешування ресурсів підтримується файлом sw.js.
-  if ('serviceWorker' in navigator && location.protocol === 'https:') {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(error => {
-        console.warn('Не вдалося зареєструвати Service Worker:', error);
+      $("all8").addEventListener("click", () => {
+        const days = getMonthData();
+        for (let day = 1; day <= daysInMonth(); day++) {
+          if (isWeekday(day)) days[day] = "8";
+        }
+        saveData();
+        render();
       });
-    });
-  }
-})();
-</script>
-</body>
-</html>
+
+      $("all12").addEventListener("click", () => {
+        const days = getMonthData();
+        for (let day = 1; day <= daysInMonth(); day++) {
+          if (isWeekday(day)) days[day] = "12";
+        }
+        saveData();
+        render();
+      });
+
+      $("resetMonth").addEventListener("click", () => {
+        if (!confirm("Скинути позначки всіх днів цього місяц
